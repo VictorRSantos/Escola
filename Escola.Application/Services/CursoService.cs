@@ -8,10 +8,12 @@ namespace Escola.Application.Services
     public class CursoService : ICursoServices
     {
         private readonly ICursoRepository _cursoRepository;
+        
         public CursoService(ICursoRepository cursoRepository)
         {
             _cursoRepository = cursoRepository;
         }
+       
         public async Task<CursoGetDTO> AddAsync(CursoPostDTO cursoPostDTO)
         {
             var curso = new Curso
