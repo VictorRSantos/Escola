@@ -80,16 +80,13 @@ namespace Escola.Application.Services
 
         public async Task<NotaGetDTO> UpdateAsync(NotaPutDTO notaPutDTO)
         {
-            var nota = new Nota
-            {
-                Id = notaPutDTO.Id,
-                MatriculaId = notaPutDTO.MatriculaId,
-                ValorNota = notaPutDTO.ValorNota,
-                Aprovado = notaPutDTO.ValorNota >= 60,
-                DataNota = DateTime.UtcNow
-            };
+            var existeNota = await _notaRepository.GetByIdAsync(notaPutDTO.Id);
+            if (existeNota == null) throw new InvalidOperationException("Nota não encontrada");
 
-            var updatedNota = await _notaRepository.UpdateAsync(nota);
+            existeNota.ValorNota = notaPutDTO.ValorNota;
+            existeNota.Aprovado = notaPutDTO.ValorNota >= 60; // Atualiza o status de aprovação com base na nova nota
+
+            var updatedNota = await _notaRepository.UpdateAsync(existeNota);
             
             if (updatedNota == null) throw new InvalidOperationException("Erro ao atualizar nota");
 
