@@ -21,11 +21,6 @@ namespace Escola.API.Controllers
 
             var createdTurma = await _turmaService.AddAsync(turmaPostDTO);
 
-            if (createdTurma == null)
-            {
-                return BadRequest("Não foi possível criar a turma. Verifique os dados e tente novamente.");
-            }
-
             return Ok("Turma criada com sucesso!");
         }
 
@@ -44,10 +39,7 @@ namespace Escola.API.Controllers
         public async Task<ActionResult> DeleteTurma(int id)
         {
             var deletedTurma = await _turmaService.DeleteAsync(id);
-            if (deletedTurma == null)
-            {
-                return BadRequest("Turma não encontrada. Verifique o ID e tente novamente.");
-            }
+           
             return Ok("Turma excluída com sucesso!");
         }
 
@@ -55,10 +47,7 @@ namespace Escola.API.Controllers
         public async Task<ActionResult> GetTurmaById(int id)
         {
             var turma = await _turmaService.GetByIdAsync(id);
-            if (turma == null)
-            {
-                return NotFound("Turma não encontrada.");
-            }
+           
             return Ok(turma);
         }
 

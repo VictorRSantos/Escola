@@ -1,5 +1,6 @@
 ﻿using Escola.Application.DTOs.Curso;
 using Escola.Application.DTOs.Turma;
+using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
@@ -9,14 +10,20 @@ namespace Escola.Application.Services
     public class TurmaService : ITurmaService
     {
         private readonly ITurmaRepository _turmaRepository;
+        private readonly ICursoRepository _cursoRepository;
 
-        public TurmaService(ITurmaRepository turmaRepository)
+        public TurmaService(ITurmaRepository turmaRepository, ICursoRepository cursoRepository)
         {
             _turmaRepository = turmaRepository;
+            _cursoRepository = cursoRepository;
         }
 
         public async Task<TurmaGetDTO> AddAsync(TurmaPostDTO turmaPostDTO)
         {
+            var curso = await _cursoRepository.GetByIdAsync(turmaPostDTO.CursoId);
+            if (curso == null)
+                throw new NotFoundException("Curso não encontrado");
+
             var turma = new Turma
             {
                 CursoId = turmaPostDTO.CursoId,
@@ -37,9 +44,9 @@ namespace Escola.Application.Services
 
         public async Task<TurmaGetDTO> DeleteAsync(int id)
         {
-            var turma =  await _turmaRepository.DeleteAsync(id);
+            var turma = await _turmaRepository.DeleteAsync(id);
             if (turma == null)
-                throw new InvalidOperationException("Turma não encontrada");
+                throw new NotFoundException("Turma não encontrada");
 
             return new TurmaGetDTO
             {
@@ -71,7 +78,7 @@ namespace Escola.Application.Services
         {
             var turma = await _turmaRepository.GetByIdAsync(id);
             if (turma == null)
-                throw new InvalidOperationException("Turma não encontrada");
+                throw new NotFoundException("Turma não encontrada");
 
             return new TurmaGetDetailDTO
             {
@@ -89,17 +96,21 @@ namespace Escola.Application.Services
 
         public async Task<TurmaGetDTO> UpdateAsync(TurmaPutDTO turmaPutDTO)
         {
-            var turma = new Turma
-            {
-                Id = turmaPutDTO.Id,
-                CursoId = turmaPutDTO.CursoId,
-                Nome = turmaPutDTO.Nome,
-                Descricao = turmaPutDTO.Descricao
-            };
+            var turma = await _turmaRepository.GetByIdAsync(turmaPutDTO.Id);
+            if (turma == null)
+                throw new NotFoundException("Turma não encontrada");
+
+            var curso = await _cursoRepository.GetByIdAsync(turmaPutDTO.CursoId);
+            if (curso == null)
+                throw new NotFoundException("Curso não encontrado");
+
+            turma.Id = turmaPutDTO.Id;
+            turma.CursoId = turmaPutDTO.CursoId;
+            turma.Nome = turmaPutDTO.Nome;
+            turma.Descricao = turmaPutDTO.Descricao;
 
             var turmaAtualizada = await _turmaRepository.UpdateAsync(turma);
-            if (turmaAtualizada == null)
-                throw new InvalidOperationException("Turma não encontrada");    
+            
             return new TurmaGetDTO
             {
                 Id = turmaAtualizada.Id,

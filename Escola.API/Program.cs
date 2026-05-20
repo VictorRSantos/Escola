@@ -1,3 +1,4 @@
+using Escola.API.Middleware;
 using Escola.Infra.Ioc;
 using Microsoft.OpenApi;
 
@@ -37,6 +38,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
