@@ -1,4 +1,5 @@
 ﻿using Escola.Application.DTOs.Nota;
+using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
@@ -8,14 +9,19 @@ namespace Escola.Application.Services
     public class NotaService : INotaService
     {   
         private readonly INotaRepository _notaRepository;
+        private readonly IMatriculaRepository _matriculaRepository;
 
-        public NotaService(INotaRepository notaRepository)
+        public NotaService(INotaRepository notaRepository, IMatriculaRepository matriculaRepository)
         {
             _notaRepository = notaRepository;
+            _matriculaRepository = matriculaRepository;
         }
 
         public async Task<NotaGetDTO> AddAsync(NotaPostDTO notaPostDTO)
         {
+            if (await _matriculaRepository.GetByIdAsync(notaPostDTO.MatriculaId) == null)
+                throw new NotFoundException("Matrícula não encontrada");
+
             var nota = new Nota
             {
                 MatriculaId = notaPostDTO.MatriculaId,
@@ -38,7 +44,8 @@ namespace Escola.Application.Services
         public async Task<NotaGetDTO> DeleteAsync(int id)
         {
             var notaDeleted = await _notaRepository.DeleteAsync(id);
-            if (notaDeleted == null) throw new InvalidOperationException("Nota não encontrada");
+            if (notaDeleted == null)
+                throw new NotFoundException("Nota não encontrada");
             
             return new NotaGetDTO
             {
@@ -66,7 +73,8 @@ namespace Escola.Application.Services
         public async Task<NotaGetDTO> GetByIdAsync(int id)
         {
             var nota = await _notaRepository.GetByIdAsync(id);
-            if (nota == null) throw new InvalidOperationException("Nota não encontrada");
+            if (nota == null)
+                throw new NotFoundException("Nota não encontrada");
 
             return new NotaGetDTO
             {
@@ -81,15 +89,22 @@ namespace Escola.Application.Services
         public async Task<NotaGetDTO> UpdateAsync(NotaPutDTO notaPutDTO)
         {
             var existeNota = await _notaRepository.GetByIdAsync(notaPutDTO.Id);
-            if (existeNota == null) throw new InvalidOperationException("Nota não encontrada");
+            if (existeNota == null)
+                throw new NotFoundException("Nota não encontrada");
+
+            if (notaPutDTO.MatriculaId != existeNota.MatriculaId)
+            {
+                if (await _matriculaRepository.GetByIdAsync(notaPutDTO.MatriculaId) == null)
+                    throw new NotFoundException("Matrícula não encontrada");
+
+                existeNota.MatriculaId = notaPutDTO.MatriculaId;
+            }
 
             existeNota.ValorNota = notaPutDTO.ValorNota;
             existeNota.Aprovado = notaPutDTO.ValorNota >= 60; // Atualiza o status de aprovação com base na nova nota
 
             var updatedNota = await _notaRepository.UpdateAsync(existeNota);
-            
-            if (updatedNota == null) throw new InvalidOperationException("Erro ao atualizar nota");
-
+          
             return new NotaGetDTO
             {
                 Id = updatedNota.Id,

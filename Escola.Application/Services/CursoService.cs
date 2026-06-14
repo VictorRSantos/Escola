@@ -1,4 +1,5 @@
 ﻿using Escola.Application.DTOs.Curso;
+using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
@@ -35,7 +36,8 @@ namespace Escola.Application.Services
         public async Task<CursoGetDTO> DeleteAsync(int id)
         {
             var deletedCurso = await _cursoRepository.DeleteAsync(id);
-            if (deletedCurso != null) return null;
+            if (deletedCurso == null)
+                throw new NotFoundException("Curso não encontrado");
 
             return new CursoGetDTO
             {
@@ -59,7 +61,8 @@ namespace Escola.Application.Services
         public async Task<CursoGetDTO> GetByIdAsync(int id)
         {
             var curso = await _cursoRepository.GetByIdAsync(id);
-            if (curso == null) return null;
+            if (curso == null)
+                throw new NotFoundException("Curso não encontrado");
 
             return new CursoGetDTO
             {
@@ -79,7 +82,8 @@ namespace Escola.Application.Services
             };
 
             var updatedCurso = await _cursoRepository.UpdateAsync(curso);
-            if (curso == null) return null;
+            if (updatedCurso == null)
+                throw new NotFoundException("Curso não encontrado");
 
             return new CursoGetDTO
             {
