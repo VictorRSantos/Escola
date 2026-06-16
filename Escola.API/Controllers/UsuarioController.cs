@@ -58,4 +58,4 @@ namespace Escola.API.Controllers
             return Ok(new {message = "Teste realizado com sucesso!"});
         }
     }
-}}
+}

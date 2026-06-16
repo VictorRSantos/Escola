@@ -34,7 +34,8 @@ namespace Escola.Infra.Data.Repositories
 
         public async Task<List<Matricula>> GetAllAsync()
         {
-            return await _context.Matricula.Where(m => !m.Excluido).ToListAsync();
+            return await _context.Matricula.Include(x => x.Usuario)
+            .Include(x=> x.Turma).Where(m => !m.Excluido).ToListAsync();
         }
 
         public async Task<Matricula> GetByIdAsync(int id)

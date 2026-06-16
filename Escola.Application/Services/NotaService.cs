@@ -86,6 +86,19 @@ namespace Escola.Application.Services
             };
         }
 
+        public async Task<List<NotaGetDTO>> GetNotasByTurmaUsuario(int idTurma, int idUsuario)
+        {
+            var notas = await _notaRepository.GetNotasByTurmaUsuario(idTurma, idUsuario);
+            return notas.Select(nota => new NotaGetDTO
+            {
+                Id = nota.Id,
+                MatriculaId = nota.MatriculaId,
+                ValorNota = nota.ValorNota,
+                Aprovado = nota.Aprovado,
+                DataNota = nota.DataNota
+            }).ToList();
+        }
+
         public async Task<NotaGetDTO> UpdateAsync(NotaPutDTO notaPutDTO)
         {
             var existeNota = await _notaRepository.GetByIdAsync(notaPutDTO.Id);

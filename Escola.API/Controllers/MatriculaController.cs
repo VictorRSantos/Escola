@@ -1,11 +1,13 @@
 ﻿using Escola.Application.DTOs.Matricula;
 using Escola.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Escola.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Administrador")]
     public class MatriculaController : ControllerBase
     {
         private readonly IMatriculaService _matriculaService;

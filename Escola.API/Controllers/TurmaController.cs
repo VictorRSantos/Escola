@@ -1,11 +1,13 @@
 ﻿using Escola.Application.DTOs.Turma;
 using Escola.Application.Interfaces;
+using Escola.Infra.Ioc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Escola.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]")]   
     public class TurmaController : Controller
     {
         private readonly ITurmaService _turmaService;
@@ -16,6 +18,7 @@ namespace Escola.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> CriarTurma(TurmaPostDTO turmaPostDTO)
         {
 
@@ -25,6 +28,7 @@ namespace Escola.API.Controllers
         }
 
         [HttpPut]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> AtualizarTurma(TurmaPutDTO turmaPutDTO)
         {
             var updatedTurma = await _turmaService.UpdateAsync(turmaPutDTO);
@@ -36,6 +40,7 @@ namespace Escola.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> DeleteTurma(int id)
         {
             var deletedTurma = await _turmaService.DeleteAsync(id);
@@ -44,6 +49,7 @@ namespace Escola.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> GetTurmaById(int id)
         {
             var turma = await _turmaService.GetByIdAsync(id);
@@ -52,9 +58,19 @@ namespace Escola.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> ListarTurmas()
         {
             var turmas = await _turmaService.GetAllAsync();
+            return Ok(turmas);
+        }
+
+        [HttpGet("user")]
+        [Authorize(Roles = "Aluno")]
+        public async Task<ActionResult> ObterTodasTurmasPorUsuario(int idUsuario)
+        {
+            var userId = User.GetUserId();
+            var turmas = await _turmaService.GetTurmaByUsuario(userId);
             return Ok(turmas);
         }
 

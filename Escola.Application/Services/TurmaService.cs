@@ -11,11 +11,12 @@ namespace Escola.Application.Services
     {
         private readonly ITurmaRepository _turmaRepository;
         private readonly ICursoRepository _cursoRepository;
-
-        public TurmaService(ITurmaRepository turmaRepository, ICursoRepository cursoRepository)
+        private readonly IUsuarioRepository _usuarioRepository;
+        public TurmaService(ITurmaRepository turmaRepository, ICursoRepository cursoRepository, IUsuarioRepository usuarioRepository)
         {
             _turmaRepository = turmaRepository;
             _cursoRepository = cursoRepository;
+            _usuarioRepository = usuarioRepository;
         }
 
         public async Task<TurmaGetDTO> AddAsync(TurmaPostDTO turmaPostDTO)
@@ -92,6 +93,27 @@ namespace Escola.Application.Services
                     Descricao = turma.Curso.Descricao
                 }
             };
+        }
+
+        public async Task<List<TurmaGetDetailDTO>> GetTurmaByUsuario(int idUsuario)
+        {
+            var usuario = await _usuarioRepository.GetByIdAsync(idUsuario);
+            if (usuario == null)
+                throw new NotFoundException("Usuário não encontrado");
+
+            var turmas = await _turmaRepository.GetTurmaByUsuario(idUsuario);
+            return turmas.Select(t => new TurmaGetDetailDTO
+            {
+                Id = t.Id,
+                Nome = t.Nome,
+                Descricao = t.Descricao,
+                Curso = new CursoGetDTO
+                {
+                    Id = t.Curso.Id,
+                    Nome = t.Curso.Nome,
+                    Descricao = t.Curso.Descricao
+                }
+            }).ToList();
         }
 
         public async Task<TurmaGetDTO> UpdateAsync(TurmaPutDTO turmaPutDTO)

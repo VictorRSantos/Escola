@@ -9,5 +9,6 @@ namespace Escola.Domain.Interfaces
         Task<Turma> AddAsync(Turma turma);
         Task<Turma> UpdateAsync(Turma turma);
         Task<Turma> DeleteAsync(int id);
+        Task<List<Turma>> GetTurmaByUsuario(int idUsuario);
     }
 }
