@@ -1,6 +1,8 @@
 ﻿using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
+using Escola.Domain.Pagination;
 using Escola.Infra.Data.Context;
+using Escola.Infra.Data.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Escola.Infra.Data.Repositories
@@ -31,9 +33,10 @@ namespace Escola.Infra.Data.Repositories
             return turma;
         }
 
-        public async Task<List<Turma>> GetAllAsync()
+        public async Task<PagedList<Turma>> GetAllAsync(int pageNumber, int pageSize)
         {
-            return await _context.Turma.Include(x => x.Curso).Where(t => !t.Excluido).ToListAsync();
+            var query = _context.Turma.Include(x => x.Curso).Where(t => !t.Excluido).AsNoTracking();
+            return await PaginationHelper.CreatePagedListAsync(query, pageNumber, pageSize);
         }
 
         public async Task<Turma> GetByIdAsync(int id)

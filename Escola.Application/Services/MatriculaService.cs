@@ -5,6 +5,7 @@ using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
+using Escola.Domain.Pagination;
 
 namespace Escola.Application.Services
 {
@@ -68,40 +69,10 @@ namespace Escola.Application.Services
             };
         }
 
-        public async Task<List<MatriculaGetDatailDTO>> GetAllAsync()
+        public async Task<PagedList<MatriculaGetDetailDTO>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var matriculas = await _matriculaRepository.GetAllAsync();
-            var matriculaGetDetailDTOs = new List<MatriculaGetDatailDTO>();
-            matriculaGetDetailDTOs.AddRange(matriculas.Select(m => new MatriculaGetDatailDTO
-            {
-                Id = m.Id,
-                DataMatricula = m.DataMatricula,
-                DataExpiracao = m.DataExpiracao,
-                Ativa = m.Ativa,
-                Usuario = new UsuarioGetDTO
-                {
-                    Id = m.Usuario.Id,
-                    Nome = m.Usuario.Nome,
-                    Email = m.Usuario.Email
-                },
-                Turma = new TurmaGetDTO
-                {
-                    Id = m.Turma.Id,
-                    Nome = m.Turma.Nome,
-                    Descricao = m.Turma.Descricao
-                }
-            }));
-
-            return matriculaGetDetailDTOs;
-        }
-
-        public async Task<MatriculaGetDatailDTO> GetByIdAsync(int id)
-        {
-            var matricula = await _matriculaRepository.GetByIdAsync(id);
-            if (matricula == null)
-                throw new NotFoundException("Matrícula não encontrada");
-
-            return new MatriculaGetDatailDTO
+            var matriculas = await _matriculaRepository.GetAllAsync(pageNumber, pageSize);
+            var matriculaGetDetailDTOs = matriculas.Select(matricula => new MatriculaGetDetailDTO
             {
                 Id = matricula.Id,
                 DataMatricula = matricula.DataMatricula,
@@ -111,13 +82,46 @@ namespace Escola.Application.Services
                 {
                     Id = matricula.Usuario.Id,
                     Nome = matricula.Usuario.Nome,
-                    Email = matricula.Usuario.Email
+                    Email = matricula.Usuario.Email,
+                    Perfil = matricula.Usuario.Perfil
                 },
                 Turma = new TurmaGetDTO
                 {
                     Id = matricula.Turma.Id,
                     Nome = matricula.Turma.Nome,
-                    Descricao = matricula.Turma.Descricao
+                    Descricao = matricula.Turma.Descricao,
+                    CursoId = matricula.Turma.CursoId
+                }
+            }).ToList();
+
+            return new PagedList<MatriculaGetDetailDTO>(matriculaGetDetailDTOs, matriculas.CurrentPage, matriculas.PageSize, matriculas.TotalCount);
+        }
+
+        public async Task<MatriculaGetDetailDTO> GetByIdAsync(int id)
+        {
+            var matricula = await _matriculaRepository.GetByIdAsync(id);
+            if (matricula == null)
+                throw new NotFoundException("Matrícula não encontrada");
+
+            return new MatriculaGetDetailDTO
+            {
+                Id = matricula.Id,
+                DataMatricula = matricula.DataMatricula,
+                DataExpiracao = matricula.DataExpiracao,
+                Ativa = matricula.Ativa,
+                Usuario = new UsuarioGetDTO
+                {
+                    Id = matricula.Usuario.Id,
+                    Nome = matricula.Usuario.Nome,
+                    Email = matricula.Usuario.Email,
+                    Perfil = matricula.Usuario.Perfil
+                },
+                Turma = new TurmaGetDTO
+                {
+                    Id = matricula.Turma.Id,
+                    Nome = matricula.Turma.Nome,
+                    Descricao = matricula.Turma.Descricao,
+                    CursoId = matricula.Turma.CursoId
                 }
             };
         }
@@ -130,12 +134,11 @@ namespace Escola.Application.Services
             if (await _matriculaRepository.GetByIdAsync(matriculaPutDTO.Id) == null)
                 throw new NotFoundException("Matrícula não encontrada");
 
-            var matricula = new Matricula
-            {
-                Id = matriculaPutDTO.Id,
-                TurmaId = matriculaPutDTO.TurmaId,
-                DataExpiracao = matriculaPutDTO.DataExpiracao
-            };
+            var matricula = await _matriculaRepository.GetByIdAsync(matriculaPutDTO.Id);
+            
+            matricula.TurmaId = matriculaPutDTO.TurmaId;
+            matricula.DataExpiracao = matriculaPutDTO.DataExpiracao;
+            
             var updatedMatricula = await _matriculaRepository.UpdateAsync(matricula);
             if (updatedMatricula != null)
                 throw new NotFoundException("Matrícula não encontrada");

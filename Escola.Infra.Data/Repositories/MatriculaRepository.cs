@@ -1,6 +1,8 @@
 ﻿using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
+using Escola.Domain.Pagination;
 using Escola.Infra.Data.Context;
+using Escola.Infra.Data.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Escola.Infra.Data.Repositories
@@ -32,15 +34,15 @@ namespace Escola.Infra.Data.Repositories
             return matricula;
         }
 
-        public async Task<List<Matricula>> GetAllAsync()
+        public async Task<PagedList<Matricula>> GetAllAsync(int pageNumber, int pageSize)
         {
-            return await _context.Matricula.Include(x => x.Usuario)
-            .Include(x=> x.Turma).Where(m => !m.Excluido).ToListAsync();
+            var query = _context.Matricula.Include(m => m.Usuario).Include(m => m.Turma).Where(m => !m.Excluido).AsNoTracking();
+            return await PaginationHelper.CreatePagedListAsync(query, pageNumber, pageSize);
         }
 
         public async Task<Matricula> GetByIdAsync(int id)
         {
-            return await _context.Matricula.Where(m => m.Id == id && !m.Excluido).FirstOrDefaultAsync();
+            return await _context.Matricula.Include(m => m.Usuario).Include(m => m.Turma).Where(m => m.Id == id && !m.Excluido).FirstOrDefaultAsync();
         }       
         
         public async Task<Matricula> UpdateAsync(Matricula matricula)

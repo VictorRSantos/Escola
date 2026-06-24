@@ -1,4 +1,6 @@
-﻿using Escola.Application.DTOs.Nota;
+﻿using Escola.API.Extensions;
+using Escola.API.Models;
+using Escola.Application.DTOs.Nota;
 using Escola.Application.Interfaces;
 using Escola.Infra.Ioc;
 using Microsoft.AspNetCore.Authorization;
@@ -69,9 +71,10 @@ namespace Escola.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Administrador")]
-        public async Task<ActionResult> ObterTodasNotas()
+        public async Task<ActionResult> ObterTodasNotas([FromQuery] int pageNumber, int pageSize)
         {
-            var notas = await _notaService.GetAllAsync();
+            var notas = await _notaService.GetAllAsync(pageNumber, pageSize);
+            Response.AddPaginationHeader(new PaginationHeader(notas.CurrentPage, notas.PageSize, notas.TotalCount, notas.TotalPages));
             return Ok(notas);
         }
 

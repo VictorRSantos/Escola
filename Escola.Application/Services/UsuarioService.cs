@@ -2,6 +2,7 @@
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
+using Escola.Domain.Pagination;
 using System.Security.Cryptography;
 
 namespace Escola.Application.Services
@@ -62,16 +63,18 @@ namespace Escola.Application.Services
            return await _usuarioRepository.ExistUserAsync();
         }
 
-        public async Task<List<UsuarioGetDTO>> GetAllAsync()
+        public async Task<PagedList<UsuarioGetDTO>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var usuarios = await _usuarioRepository.GetAllAsync();
-            return usuarios.Select(u => new UsuarioGetDTO
+            var usuarios = await _usuarioRepository.GetAllAsync(pageNumber, pageSize);
+            var usuarioDtos = usuarios.Select(u => new UsuarioGetDTO
             {
                 Id = u.Id,
                 Nome = u.Nome,
                 Email = u.Email,
                 Perfil = u.Perfil
             }).ToList();
+
+            return new PagedList<UsuarioGetDTO>(usuarioDtos, usuarios.CurrentPage, usuarios.PageSize, usuarios.TotalCount);
         }
 
         public async Task<UsuarioGetDTO> GetByIdAsync(int id)

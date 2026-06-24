@@ -3,7 +3,7 @@ using Escola.Application.DTOs.Usuario;
 
 namespace Escola.Application.DTOs.Matricula
 {
-    public class MatriculaGetDatailDTO
+    public class MatriculaGetDetailDTO
     {
         public int Id { get; set; }
         public UsuarioGetDTO Usuario { get; set; }

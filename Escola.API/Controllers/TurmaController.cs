@@ -1,4 +1,6 @@
-﻿using Escola.Application.DTOs.Turma;
+﻿using Escola.API.Extensions;
+using Escola.API.Models;
+using Escola.Application.DTOs.Turma;
 using Escola.Application.Interfaces;
 using Escola.Infra.Ioc;
 using Microsoft.AspNetCore.Authorization;
@@ -59,9 +61,10 @@ namespace Escola.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Administrador")]
-        public async Task<ActionResult> ListarTurmas()
+        public async Task<ActionResult> ListarTurmas([FromQuery] int pageNumber, int pageSize)
         {
-            var turmas = await _turmaService.GetAllAsync();
+            var turmas = await _turmaService.GetAllAsync(pageNumber, pageSize);
+            Response.AddPaginationHeader(new PaginationHeader(turmas.CurrentPage, turmas.PageSize, turmas.TotalCount, turmas.TotalPages));
             return Ok(turmas);
         }
 

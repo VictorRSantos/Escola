@@ -4,6 +4,7 @@ using Escola.Application.Exceptions;
 using Escola.Application.Interfaces;
 using Escola.Domain.Entities;
 using Escola.Domain.Interfaces;
+using Escola.Domain.Pagination;
 
 namespace Escola.Application.Services
 {
@@ -58,10 +59,10 @@ namespace Escola.Application.Services
             };
         }
 
-        public async Task<List<TurmaGetDetailDTO>> GetAllAsync()
+        public async Task<PagedList<TurmaGetDetailDTO>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var turmas = await _turmaRepository.GetAllAsync();
-            return turmas.Select(t => new TurmaGetDetailDTO
+            var turmas = await _turmaRepository.GetAllAsync(pageNumber, pageSize);
+            var turmaDto = new List<TurmaGetDetailDTO>(turmas.Select(t => new TurmaGetDetailDTO
             {
                 Id = t.Id,
                 Nome = t.Nome,
@@ -72,7 +73,9 @@ namespace Escola.Application.Services
                     Nome = t.Curso.Nome,
                     Descricao = t.Curso.Descricao
                 }
-            }).ToList();
+            }).ToList());
+
+            return new PagedList<TurmaGetDetailDTO>(turmaDto, turmas.CurrentPage, turmas.PageSize, turmas.TotalCount);
         }
 
         public async Task<TurmaGetDetailDTO> GetByIdAsync(int id)
