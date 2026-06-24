@@ -70,10 +70,10 @@ namespace Escola.API.Controllers
 
         [HttpGet("user")]
         [Authorize(Roles = "Aluno")]
-        public async Task<ActionResult> ObterTodasTurmasPorUsuario(int idUsuario)
+        public async Task<ActionResult> ObterTodasTurmasPorUsuario(int idUsuario, [FromQuery] int pageNumber, int pageSize)
         {
             var userId = User.GetUserId();
-            var turmas = await _turmaService.GetTurmaByUsuario(userId);
+            var turmas = await _turmaService.GetTurmaByUsuario(userId, pageNumber, pageSize);
             return Ok(turmas);
         }
 

@@ -10,6 +10,6 @@ namespace Escola.Application.Interfaces
         Task<TurmaGetDTO> AddAsync(TurmaPostDTO turmaPostDTO);
         Task<TurmaGetDTO> UpdateAsync(TurmaPutDTO turmaPutDTO);
         Task<TurmaGetDTO> DeleteAsync(int id);
-        Task<List<TurmaGetDetailDTO>> GetTurmaByUsuario(int idUsuario);
+        Task<PagedList<TurmaGetDetailDTO>> GetTurmaByUsuario(int idUsuario, int pageNumber, int pageSize);
     }
 }

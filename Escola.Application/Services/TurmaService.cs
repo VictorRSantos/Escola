@@ -98,14 +98,14 @@ namespace Escola.Application.Services
             };
         }
 
-        public async Task<List<TurmaGetDetailDTO>> GetTurmaByUsuario(int idUsuario)
+        public async Task<PagedList<TurmaGetDetailDTO>> GetTurmaByUsuario(int idUsuario, int pageNumber, int pageSize)
         {
             var usuario = await _usuarioRepository.GetByIdAsync(idUsuario);
             if (usuario == null)
                 throw new NotFoundException("Usuário não encontrado");
 
-            var turmas = await _turmaRepository.GetTurmaByUsuario(idUsuario);
-            return turmas.Select(t => new TurmaGetDetailDTO
+            var turmas = await _turmaRepository.GetTurmaByUsuario(idUsuario, pageNumber, pageSize);
+            var turmaDtos = turmas.Select(t => new TurmaGetDetailDTO
             {
                 Id = t.Id,
                 Nome = t.Nome,
@@ -117,6 +117,7 @@ namespace Escola.Application.Services
                     Descricao = t.Curso.Descricao
                 }
             }).ToList();
+            return new PagedList<TurmaGetDetailDTO>(turmaDtos, turmas.CurrentPage, turmas.PageSize, turmas.TotalCount);
         }
 
         public async Task<TurmaGetDTO> UpdateAsync(TurmaPutDTO turmaPutDTO)

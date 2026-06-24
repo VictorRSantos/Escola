@@ -44,12 +44,12 @@ namespace Escola.Infra.Data.Repositories
             return await _context.Turma.Include(x => x.Curso).Where(t => t.Excluido == false && t.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<List<Turma>> GetTurmaByUsuario(int idUsuario)
+        public async Task<PagedList<Turma>> GetTurmaByUsuario(int idUsuario, int pageNumber, int pageSize)
         {
-            return await _context.Turma
+            var query = _context.Turma
                 .Include(t => t.Curso)
-                .Where(t => t.Matriculas.Any(u => u.UsuarioId == idUsuario) && !t.Excluido)
-                .ToListAsync();
+                .Where(t => t.Matriculas.Any(u => u.UsuarioId == idUsuario) && !t.Excluido).AsNoTracking();
+            return await PaginationHelper.CreatePagedListAsync(query, pageNumber, pageSize);
         }
 
         public async Task<Turma> UpdateAsync(Turma turma)
